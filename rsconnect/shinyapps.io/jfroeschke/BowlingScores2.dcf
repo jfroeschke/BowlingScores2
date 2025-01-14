@@ -1,0 +1,12 @@
+name: BowlingScores2
+title: BowlingScores2
+username: jfroeschke
+account: jfroeschke
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13695883
+bundleId: 9642261
+url: https://jfroeschke.shinyapps.io/BowlingScores2/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
