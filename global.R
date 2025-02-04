@@ -10,6 +10,8 @@ library(tidyverse)
 library(bslib)
 library(bsicons)
 library(thematic)
+library(plotly)
+library(rpivotTable)
 
 #thematic_shiny()
 # 

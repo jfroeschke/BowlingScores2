@@ -10,7 +10,7 @@
 # Server
 server <- function(input, output, session) {
   
-  #bs_themer()
+ # bs_themer()
   
   # Reactive expression to filter data
   filtered_data0 <- reactive({
@@ -22,8 +22,8 @@ server <- function(input, output, session) {
       data <- data[data$Location %in% input$location_filter,]
     if (!is.null(input$ball) && length(input$ball) > 0)
       data <- data[data$Ball %in% input$ball,]
-    # # if (!is.null(input$location_filter) && length(input$location_filter) > 0)
-    # #   data <- data[data$Location %in% input$location_filter,]
+    if (!is.null(input$lanecondition) && length(input$lanecondition) > 0)
+      data <- data[data$'Lane Conditions' %in% input$lanecondition,]
     # # if (!is.null(input$ball) && length(input$ball) > 0)
     # #   data <- data[data$Ball %in% input$ball,]
     # 
@@ -54,17 +54,38 @@ server <- function(input, output, session) {
 
 ######################### End  Output Table ########################
   ######################### Time Series Chart ########################
-output$score_trend <- renderPlot({
+#output$score_trend <- renderPlot({
+  output$score_trend <- renderPlotly({ # with plotly
   req(nrow(filtered_data()) > 0)
 
-  ggplot(filtered_data(), aes(x = Date, y = Score, color = Player)) +
-    geom_point() +
-    geom_smooth(se = FALSE, method = "loess") +
-    theme_minimal() +
-    labs(#title = "Score Trends Over Time",
-         x = "Date",
-         y = "Score") +
-    theme(legend.position = "bottom")
+  # p <- ggplot(filtered_data(), aes(x = Date, y = Score, color = Player)) +
+  #   geom_point() +
+  #   geom_smooth(se = FALSE, method = "loess") +
+  #   theme_minimal() +
+  #   labs(#title = "Score Trends Over Time",
+  #        x = "Date",
+  #        y = "Score") +
+  #   theme(legend.position = "bottom")
+  # p2 <- ggplotly(p)
+    
+    p <- ggplot(filtered_data(), aes(x = Date, y = Score, color = Player)) +
+      geom_point() +
+      geom_smooth(se = FALSE, method = "loess") +
+      theme_minimal() +
+      labs(
+        x = "Date",
+        y = "Score"
+      ) +
+      theme(
+        legend.position = "bottom",
+        axis.title = element_text(size = 18),  # Larger axis labels
+        axis.text = element_text(size = 14)   # Larger tick labels
+      ) +
+      #scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") + # More x-axis ticks
+      scale_y_continuous(limits = c(80, 300), breaks = seq(0, 300, by = 20)) # Set y-limits and more ticks
+    
+    p2 <- ggplotly(p)
+    
 })
 
 ######################### End: Time Series Chart ########################
@@ -81,6 +102,13 @@ output$avg_score <- renderText({
   output$num_games<- renderText({
     req(filtered_data())
     length(filtered_data()$Score)
+    #round(mean(filtered_data()$Score, na.rm = TRUE), 1)
+    #filtered_data()$Score[2]
+  })
+  
+  output$max_score <- renderText({
+    req(filtered_data())
+    max(filtered_data()$Score)
     #round(mean(filtered_data()$Score, na.rm = TRUE), 1)
     #filtered_data()$Score[2]
   })
@@ -106,6 +134,7 @@ output$avg_score <- renderText({
         annotate("text", x = 1, y = 1, label = "No data available for the selected date range.", size = 5) +
         theme_void()
     }
+    
   }) 
   ######################### End:  Histogram of Scores ########################
   ######################### Game Simulator ########################  
@@ -156,5 +185,17 @@ output$avg_score <- renderText({
     #filtered_data()$Score[2]
   })
   ######################### End:  Game Simulator ########################
+  
+  output$pivotTable <- renderRpivotTable({
+    rpivotTable(
+      data = data,
+      rows = "Date",
+      cols = "Player",
+      vals = "Score",
+      aggregatorName = "Average",
+      rendererName = "Table"
+    )
+  })
+  
     
 } ## End bracket

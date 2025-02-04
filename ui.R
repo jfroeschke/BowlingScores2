@@ -13,9 +13,11 @@ ui <- page_sidebar(
   title = "Bowling Scores",
   sidebar = sidebar(
     class = "bg-secondary", ## change sidebar background color
-    selectInput("player_filter", "Player Name", 
-                choices = c("John", "Andrew", "Catalina", "Bridgette"), 
-                multiple = TRUE, 
+    
+    HTML('<img src="logo2v2.jpg" width="100%" height="auto" style="border-radius: 50%;">'),
+    selectInput("player_filter", "Player Name",
+                choices = c("John", "Andrew", "Catalina", "Bridgette"),
+                multiple = TRUE,
                 selected = c("John", "Andrew", "Catalina", "Bridgette")),
     dateRangeInput(
       "date_range",
@@ -26,11 +28,17 @@ ui <- page_sidebar(
       max = max(data$Date)
     ),
     selectInput("location_filter", "Bowling Alley",
-                choices = c("PCB", "PCM", "NA"), 
+                choices = unique(bowling_data$Location), 
                 multiple = TRUE),
     selectInput("ball", "Ball Used",
                 choices = unique(bowling_data$Ball), 
                 multiple = TRUE),
+    selectInput("lanecondition", "Lane Condition",
+                choices = unique(bowling_data$'Lane Conditions'), 
+                multiple = TRUE,
+                
+                selected = unique(bowling_data$'Lane Conditions')
+                )
     # value_box(
     #   title = p("Average Score", bs_icon("award-fill")),
     #   value = verbatimTextOutput("avg_score"),
@@ -43,7 +51,11 @@ ui <- page_sidebar(
     #   theme = "success"
     #   #showcase = bs_icon("bar-chart")
     # ),
-    HTML('<img src = "logo2.png", width = "100%", height = "auto">')
+    #HTML('<img src = "logo2v2.jpg", width = "100%", height = "auto">')
+
+
+
+    
   ),
   #layout_columns(
     # Add tab panel here
@@ -57,9 +69,11 @@ ui <- page_sidebar(
     value_box(
       title = p("Average Score", bs_icon("award-fill")),
       value = verbatimTextOutput("avg_score"),
-      theme = "secondary"
+      theme = "success"
       #showcase = bs_icon("award-fill")
     ),
+    
+  
     value_box(
       title = p("Games", bs_icon("bar-chart")),
       value = verbatimTextOutput("num_games"),
@@ -67,15 +81,17 @@ ui <- page_sidebar(
       #showcase = bs_icon("bar-chart")
     ),
     value_box(
-      title = p("Games", bs_icon("bar-chart")),
-      value = 1,
+      title = p("Max Score", bs_icon("award-fill")),
+      value = verbatimTextOutput("max_score"),
       theme = "success"
       #showcase = bs_icon("bar-chart")
     ),
         
     ### end value boxes    
-        card(card_header("Score Trends", class = "text-success"),
-             plotOutput("score_trend", height = "400px")
+        #card(card_header("Score Trends", class = "text-success"), ## if want to change color of text
+             card(card_header("Score Trends"),
+            # plotOutput("score_trend", height = "400px")
+             plotlyOutput("score_trend", height = "400px")
         ),
         card(card_header("Create a Bowling Match"),
              selectInput(
@@ -101,11 +117,24 @@ ui <- page_sidebar(
       ),
       tabPanel(
         title = "Scores Data",
-        card(card_header("Test Tab Content"),
-             h4("This is the Test tab content."),
+        card(card_header("Scores"),
+             #h4("This is the Test tab content."),
              DT::dataTableOutput("filtered_table")
         )
+      ),
+    
+  ############# This Panel would allow exploration of the data using a pivot table  
+    tabPanel(
+      title = "Pivot",
+      card(card_header("Score Explorer"),
+           #h4("This is the Test tab content."),
+           rpivotTableOutput("pivotTable")
+           
       )
+    )
+  ############# End: This Panel would allow exploration of the data using a pivot table     
+    
+    
     ),
     #col_widths = c( 6,6,12, 6,6, 12), ## this isnt working as expected
     #row_heights = c(4, 2)
